@@ -28,10 +28,23 @@ class Cidades(SearchDomain):
         (C1,C2) = action
         if C1==city:
             return C2
+
     def cost(self, city, action):
-        pass
+        for (C1,C2,D) in self.connections:
+            if action in [(C1,C2), (C2,C1)]:
+                return D
+        return None
+
     def heuristic(self, city, goal_city):
-        pass
+        x_orig, y_orig = self.coordinates[city]
+        x_dest, y_dest = self.coordinates[goal_city]
+
+        x = abs(x_orig - x_dest)
+        y = abs(y_orig - y_dest) 
+
+        #return sqrt(x**2 + y**2)
+        return hypot(x,y)
+
     def satisfies(self, city, goal_city):
         return goal_city==city
 

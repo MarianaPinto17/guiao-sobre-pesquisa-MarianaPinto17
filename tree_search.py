@@ -97,10 +97,13 @@ class SearchTree:
             lnewnodes = []
             for a in self.problem.domain.actions(node.state):
                 newstate = self.problem.domain.result(node.state,a)
-                newnode = SearchNode(newstate,node)
-                lnewnodes.append(newnode)
+                newnode = SearchNode(newstate,node, node.depth+1, node.cost + self.problem.domain.cost(node.state,a))
+                if not node.in_parent(newstate) and (limit is None or newnode.depth <= limit) :
+                    lnewnodes.append(newnode)
             self.add_to_open(lnewnodes)
         return None
+
+    
 
     # juntar novos nos a lista de nos abertos de acordo com a estrategia
     def add_to_open(self,lnewnodes):
@@ -109,5 +112,5 @@ class SearchTree:
         elif self.strategy == 'depth':
             self.open_nodes[:0] = lnewnodes
         elif self.strategy == 'uniform':
-            pass
+            self.open_nodes = sorted(self.open_nodes + lnewnodes, key = lambda node: node.cost)
 
