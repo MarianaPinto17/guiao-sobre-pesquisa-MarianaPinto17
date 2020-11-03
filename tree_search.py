@@ -62,9 +62,10 @@ class SearchProblem:
 
 # Nos de uma arvore de pesquisa
 class SearchNode:
-    def __init__(self,state,parent): 
+    def __init__(self,state,parent,depth): 
         self.state = state
         self.parent = parent
+        self.depth = depth
     def __str__(self):
         return "no(" + str(self.state) + "," + str(self.parent) + ")"
     def __repr__(self):
@@ -76,7 +77,8 @@ class SearchTree:
     # construtor
     def __init__(self,problem, strategy='breadth'): 
         self.problem = problem
-        root = SearchNode(problem.initial, None)
+        #depth = 0 no root
+        root = SearchNode(problem.initial, None,0)
         self.open_nodes = [root]
         self.strategy = strategy
 
@@ -90,16 +92,29 @@ class SearchTree:
 
     # procurar a solucao
     def search(self):
+        #enquanto a fila não está vazia
         while self.open_nodes != []:
+            # remover cabeça da fila
             node = self.open_nodes.pop(0)
+            #comprimento de uma solução, deve ser incrementado por cada nó percorrido
+            self.depth+=1;
+            #se o nó satisfaz o objetivo
             if self.problem.goal_test(node.state):
+                #retorna a solução -> o caminho
                 return self.get_path(node)
+            #lista dos novos nós que resultam da expansão dos nós que saíram da fila
             lnewnodes = []
+            #spara cada ação possível executada no estado atual (node.state -> nó que saiu da fila)
             for a in self.problem.domain.actions(node.state):
+                #calculamos o novo estado 
                 newstate = self.problem.domain.result(node.state,a)
+                #criar um novo nó que tem como pai o nó que estamos a expandir
                 newnode = SearchNode(newstate,node, node.depth+1, node.cost + self.problem.domain.cost(node.state,a))
+                #se a ação seguinte não é parente do nó corrente e o limite do novo nó < limit ou limit = NONE
                 if not node.in_parent(newstate) and (limit is None or newnode.depth <= limit) :
+                    #adicionar o novo nó à fila dos novos nós
                     lnewnodes.append(newnode)
+            #acrescentar os novos nós à fila dos nós abertos
             self.add_to_open(lnewnodes)
         return None
 
