@@ -1,4 +1,3 @@
-
 # Module: tree_search
 # 
 # This module provides a set o classes for automated
@@ -97,7 +96,6 @@ class SearchTree:
         self.solution = None
         self.terminals = 1
         self.non_terminals = 0
-        #self.cost = -1
 
     # obter o caminho (sequencia de estados) da raiz ate um no
     def get_path(self,node):
