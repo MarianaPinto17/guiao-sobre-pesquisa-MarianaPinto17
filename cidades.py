@@ -11,6 +11,8 @@
 
 
 from tree_search import *
+from timeit import timeit
+from math import * 
 
 class Cidades(SearchDomain):
     def __init__(self,connections, coordinates):
@@ -39,10 +41,11 @@ class Cidades(SearchDomain):
         x_orig, y_orig = self.coordinates[city]
         x_dest, y_dest = self.coordinates[goal_city]
 
+        #normalizar o vetor para começar em 0,0
         x = abs(x_orig - x_dest)
         y = abs(y_orig - y_dest) 
 
-        #return sqrt(x**2 + y**2)
+        #return sqrt(x**2 + y**2) -> hipotenusa dá-nos a distancia entre dois pontos
         return hypot(x,y)
 
     def satisfies(self, city, goal_city):
@@ -116,9 +119,37 @@ cidades_portugal = Cidades(
 
 
 p = SearchProblem(cidades_portugal,'Braga','Faro')
-t = SearchTree(p,'breadth')
+#para o mesmo problema vai fazer a pesquisa em profundidade, largura, etc, 
+t = SearchTree(p,'depth')
+t2 = SearchTree(p, 'breadth')
+t3 = SearchTree(p, 'uniform')
+t4 = SearchTree(p, 'greedy')
+t5 = SearchTree(p, 'a*')
 
+print("== depth ==")
 print(t.search())
+print(timeit(lambda: t.search(), number=10))
+print(t.length, t.cost, t.avg_branching, t.terminals, t.non_terminals)
+
+print("== breadth ==")
+print(t2.search())
+print(timeit(lambda: t2.search(), number=10))
+print(t2.length, t2.cost, t2.avg_branching, t2.terminals, t2.non_terminals)
+
+print("== uniform ==")
+print(t3.search())
+print(timeit(lambda: t3.search(), number=10))
+print(t3.length, t3.cost, t3.avg_branching, t3.terminals, t3.non_terminals)
+
+print("== greedy ==")
+print(t4.search())
+print(timeit(lambda: t4.search(), number=10))
+print(t4.length, t4.cost, t4.avg_branching, t4.terminals, t4.non_terminals)
+
+print("== a* ==")
+print(t5.search())
+print(timeit(lambda: t5.search(), number=10))
+print(t5.length, t5.cost, t5.avg_branching, t5.terminals, t5.non_terminals) 
 
 
 # Atalho para obter caminho de c1 para c2 usando strategy:
