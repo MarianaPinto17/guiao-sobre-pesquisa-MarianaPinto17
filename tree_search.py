@@ -56,21 +56,21 @@ class SearchProblem:
         self.domain = domain
         self.initial = initial
         self.goal = goal
+
+    #verifica se state é o objetivo    
     def goal_test(self, state):
         return self.domain.satisfies(state,self.goal)
 
 # Nos de uma arvore de pesquisa
 class SearchNode:
-    def __init__(self,state,parent,depth,cost,heuristic): 
+    def __init__(self,state,parent,depth,cost): 
         self.state = state
         self.parent = parent
-        #profundidade do nó
         self.depth = depth
-        #custo de cada nó até à raiz
-        self.cost=cost
-        self.heuristic = heuristic
+        self.cost = cost
 
-    # faz com que não haja ciclos -> se a ação seguinte for parent do nó corrente está a andar para trás
+    # faz com que não haja ciclos -> se a ação seguinte for parent 
+    # do nó corrente está a andar para trás
     # logo está a criar ciclos
     def in_parent(self,state):
         if self.state == state:
@@ -86,16 +86,22 @@ class SearchNode:
 
 # Arvores de pesquisa
 class SearchTree:
+
     # construtor
     def __init__(self,problem, strategy='breadth'): 
         self.problem = problem
-        self.depth = 0 #no root
-        root = SearchNode(problem.initial, None,0,0, self.problem.domain.heuristic(problem.initial, problem.goal))
+        root = SearchNode(problem.initial, None,0,0)
         self.open_nodes = [root]
         self.strategy = strategy
         self.solution = None
+        #root está por abrir
         self.terminals = 1
         self.non_terminals = 0
+
+    # fator de ramificacao
+    @property
+    def avg_branching(self):
+        return round((self.terminals + self.non_terminals -1 )/self.non_terminals, 2)
 
     # obter o caminho (sequencia de estados) da raiz ate um no
     def get_path(self,node):
@@ -104,50 +110,36 @@ class SearchTree:
         path = self.get_path(node.parent)
         path += [node.state]
         return(path)
-    
-    # comprimento solução sempre que um nó é percorrido
+
     @property
+    #retorna o depth da solucao
     def length(self):
         return self.solution.depth
 
-    @property
+    # retorna o custo da solucao
+    @oroperty
     def cost(self):
         return self.solution.cost
 
-    # factor de ramificação média é dado pelo ratio entre o número de nós filhos
-    # (ou seja, todos os nós com excepção da raiz da árvore) e o número de nós pais (nós não
-    # terminais)
-    @property
-    def avg_branching(self):
-        return round((self.terminals + self.non_terminals-1)/self.non_terminals, 2)
-
     # procurar a solucao
     def search(self, limit = None):
-        #enquanto a fila não está vazia
         while self.open_nodes != []:
-            # remover cabeça da fila
             node = self.open_nodes.pop(0)
-            #se o nó satisfaz o objetivo
             if self.problem.goal_test(node.state):
-                self.terminals = len(self.open_nodes)+1
-                self.solution = node 
-                #retorna a solução -> o caminho
+                #goal ainda é nó terminal
+                self.terminals=len(self.open_nodes) + 1
+                #self.solution guarda o nó correspondente à solução
+                self.solution = node
                 return self.get_path(node)
-            self.non_terminals += 1
-            #lista dos novos nós que resultam da expansão dos nós que saíram da fila
+            self.non_terminals +=1
             lnewnodes = []
-            #spara cada ação possível executada no estado atual (node.state -> nó que saiu da fila)
             for a in self.problem.domain.actions(node.state):
-                #calculamos o novo estado 
                 newstate = self.problem.domain.result(node.state,a)
-                #criar um novo nó que tem como pai o nó que estamos a expandir
-                newnode = SearchNode(newstate,node, node.depth+1, node.cost + self.problem.domain.cost(node.state,a),self.problem.domain.heuristic(newstate, self.problem.goal))
-                #se a ação seguinte não é parente do nó corrente e
-                #se a profundidade do nó não ultrapassa o limite definido antes de adicionar a lista de nós abertos. (profundidade com limite)
-                if not node.in_parent(newstate) and (limit is None or newnode.depth <= limit) :
-                    #adicionar o novo nó à fila dos novos nós
+                newnode = SearchNode(newstate,node,node.depth+1,node.cost + self.problem.domain.cost(node.state,a))
+                # não acrestamos um nó que tem um nenhum state se a existir como pai do meu nó atual
+                # e pesquisa 
+                if not node.in_parent(newstate) and (limit is None or newnode.depth <= limit):
                     lnewnodes.append(newnode)
-            #acrescentar os novos nós à fila dos nós abertos
             self.add_to_open(lnewnodes)
         return None
 
@@ -158,10 +150,4 @@ class SearchTree:
         elif self.strategy == 'depth':
             self.open_nodes[:0] = lnewnodes
         elif self.strategy == 'uniform':
-            self.open_nodes = sorted(self.open_nodes + lnewnodes, key = lambda node: node.cost)
-        #escolha o caminho que aproxima mais para o objetivo
-        elif self.strategy == 'greedy':
-            self.open_nodes = sorted(self.open_nodes + lnewnodes, key = lambda node: node.heuristic)
-        #ordenamos pelo custo e heuristica (meio termo entre uniform e greedy) -> em media a* tem melhores resultados para todos
-        elif self.strategy == 'a*':
-            self.open_nodes = sorted(self.open_nodes + lnewnodes, key = lambda node: node.cost + node.heuristic )
+            pass

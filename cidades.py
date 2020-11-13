@@ -115,9 +115,7 @@ cidades_portugal = Cidades(
                        'Portalegre': (130,170) }
                      )
 
-
-
-
+'''
 p = SearchProblem(cidades_portugal,'Braga','Faro')
 #para o mesmo problema vai fazer a pesquisa em profundidade, largura, etc, 
 t = SearchTree(p,'depth')
@@ -158,6 +156,4 @@ def search_path(c1,c2,strategy):
     my_tree = SearchTree(my_prob)
     my_tree.strategy = strategy
     return my_tree.search()
-
-
-
+'''
