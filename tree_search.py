@@ -117,7 +117,7 @@ class SearchTree:
         return self.solution.depth
 
     # retorna o custo da solucao
-    @oroperty
+    @property
     def cost(self):
         return self.solution.cost
 
